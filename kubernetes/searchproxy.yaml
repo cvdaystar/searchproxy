@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: searchproxy
+  name: searchproxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: searchproxy
+  template:
+    metadata:
+      labels:
+        app: searchproxy
+    spec:
+      containers:
+      - image: gcr.io/{your project}/searchproxy:0.0.3
+        imagePullPolicy: Always
+        name: searchproxy
+        ports:
+        resources:
+          limits:
+            cpu: 100m
+          requests:
+            cpu: 100m          
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: searchproxy-svc
+  annotations:
+    beta.cloud.google.com/backend-config: '{"ports": {"3001":"searchproxy-backendconfig"}}'
+spec:
+  selector:
+    app: searchproxy
+  ports:
+  - protocol: TCP
+    port: 3001
+    targetPort: 3001
+  type: LoadBalancer
